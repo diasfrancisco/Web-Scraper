@@ -17,7 +17,6 @@ def load_and_accept_cookies():
     delay = 10
     try:
         WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.XPATH, '//*[@class="gdpr_ly_cookie _gdprCookieBanner on"]')))
-        driver.switch_to.frame('gdpr_ly_cookie _gdprCookieBanner on')
         accept_cookies_button = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.XPATH, '//*[@class="link _agree N=a:ckb.agree"]'))).click()
         time.sleep(1)
     except TimeoutException:

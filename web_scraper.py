@@ -9,13 +9,12 @@ def Start():
     driver = webdriver.Chrome()
     url = 'https://www.webtoons.com/en/gdpr/ageGate'
     driver.get(url)
-    driver.fullscreen_window()
-    time.sleep(2)
+    driver.implicitly_wait(10)
 
-    def genres():
+    def get_genres():
         time.sleep(1)
         driver.find_element(By.XPATH, '//*[@class="NPI=a:genre,g:en_en"]').click() # Go to the genres tab
-        time.sleep(2)
+        time.sleep(1)
 
         # Grab the name of all genres in the main section
         genre_list = []
@@ -52,9 +51,9 @@ def Start():
             # If the cookies frame take longer than 10sec to load print out the following statement
             print("Took too long to load...")
 
-        genres()
+        get_genres()
 
-    def age_verification():
+    def bypass_age_verification():
         # Enter the day
         day_path = driver.find_element(By.XPATH, '//*[@id="_day"]')
         day_path.send_keys("24")
@@ -75,7 +74,7 @@ def Start():
 
         load_and_accept_cookies()
 
-    age_verification()
+    bypass_age_verification()
 
     time.sleep(4)
     driver.quit()

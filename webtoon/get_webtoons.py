@@ -6,8 +6,8 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webtoon.single_webtoon import GetDetails
-from webtoon.store_data import StoreRawData
+from webtoon.single_webtoon import GenerateIDs, GetDetails
+from webtoon.store_data import WebtoonDirs
 
 
 class GetWebtoonLinks:
@@ -85,6 +85,8 @@ class GetWebtoonLinks:
             By.XPATH, '//*[@class="card_wrap genre"]'
         )
         for genre in self._g_list:
+            # Collect all the 'data-genre' attributes and save it to a
+            # dictionary to be used as a locator key
             webtoon_container = genre_container.find_element(
                 By.XPATH, f'//h2[@data-genre="{genre}"]/following-sibling::ul'
             )
@@ -96,16 +98,21 @@ class GetWebtoonLinks:
     def get_all_webtoon_links(self, webtoons):
         list_of_links = []
         for webtoon in webtoons:
+            # For every li tag, get the link from the 'href' attribute and
+            # for every webtoon link generate a friendly ID, a v4 UUID, a
+            # new directory. Also, get all episode links and the data from
+            # each episode
             link_tag = webtoon.find_element(By.TAG_NAME, 'a')
             webtoon_link = link_tag.get_attribute('href')
-            id_instance = GetDetails.get_friendly_ID(self, webtoon_link)
-            v4_uuid_instance = GetDetails.generate_v4_UUID(self, webtoon_link)
-            create_dir_instance = StoreRawData.create_dir()
-            webtoon_dir_instance = StoreRawData.webtoon_dir(self.dict_of_friendly_ID)
+            GenerateIDs.get_friendly_ID(self, webtoon_link)
+            GenerateIDs.generate_v4_UUID(self, webtoon_link)
+            WebtoonDirs.webtoon_dir(self.dict_of_friendly_ID)
+            GetDetails.navigate_pages()
             list_of_links.append(webtoon_link)
         return list_of_links
 
     '''def export_dict(self):
+        # Export all the necessary dictionaries to view and check data types
         webtoon_dict = json.dumps(self.dict_of_webtoon_links)
         f = open('webtoon_dict.json', 'w')
         f.write(webtoon_dict)

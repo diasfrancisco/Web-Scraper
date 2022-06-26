@@ -1,12 +1,13 @@
 import os
 import time
-import modules.constants as const
+import webtoon.constants as const
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from modules.genres import GetWebtoonLinks
+from webtoon.get_webtoons import GetWebtoonLinks
+from webtoon.single_webtoon import GetDetails
 
 
 class Webtoon(webdriver.Chrome):
@@ -71,6 +72,11 @@ class Webtoon(webdriver.Chrome):
             print("Took too long to load...")
 
     def collect_genres(self):
+        # Calls the class and methods needed to get genres, generate a friendly ID and a v4 UUID
         genre_instance = GetWebtoonLinks(driver=self)
         genre_instance.get_genres()
         genre_instance.get_webtoon_list()
+        genre_instance.export_dict()
+
+    def scrape_webtoon(self):
+        scrape_instance = GetDetails(driver=self)

@@ -1,13 +1,13 @@
-from os import link
-from modules.navigate import Webtoon
+from webtoon.to_WEBTOONS import Webtoon
 
 
 def main():
     with Webtoon(collapse=False) as bot:
         bot.get_main_page()
         bot.bypass_age_gate()
-        bot.load_and_accept_cookies()
+        bot.load_and_accept_cookies() 
         bot.collect_genres()
+        #bot.scrape_webtoon()
 
 if __name__=="__main__":
     main()

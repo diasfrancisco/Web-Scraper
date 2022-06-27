@@ -28,19 +28,11 @@ class GetDetails:
     def __init__(self, driver:WebDriver):
         self.driver = driver
         self.list_of_episodes = []
-        
-    def navigate_pages(self, webtoon_link):
-        # Open a new tab with the given link
-        self.driver.execute_script(f'''window.open({webtoon_link}, "_blank");''')
-        navigation_container = self.driver.find_element(By.XPATH, '//*div[@class="paginate"]')
-        current_pages = navigation_container.find_elements(By.TAG_NAME, 'a')
-        all_page_links = []
-        for page in current_pages:
-            if page.get_attribute('href') not in all_page_links:
-                all_page_links.append(page.get_attribute('href'))
 
-    def get_episodes(self):
-        # Wait for the container element to appear
+    def get_episodes(self, webtoon_link):
+        self.driver.execute_script(f'''window.open({webtoon_link}, "_blank");''')
+        
+        # Wait for the episode container to appear
         try:
             WebDriverWait(self.driver, const.DELAY).until(
                 EC.presence_of_element_located((By.XPATH, '//*[@id="_listUl"]'))
@@ -48,11 +40,17 @@ class GetDetails:
         except TimeoutException:
             print("Episode container did not load")
         
+        GetDetails.get_webtoon_info()
+
         ep_container = self.driver.find_element(By.XPATH, '//*[@id="_listUl"]')
-        eps = ep_container.find_elements(By.TAG_NAME, 'li')
+        latest_ep = ep_container.find_element(By.TAG_NAME, 'li')
+        ep_tag = latest_ep.find_element(By.TAG_NAME, 'a')
+        ep_link = ep_tag.get_attribute('href')
+        self.driver.get(ep_link)
+        GetDetails.scrape_image_data()
 
-        for ep in eps:
-            pass
+    def scrape_image_data(self):
+        pass
 
-    def get_popularity_stats(self):
+    def get_webtoon_info(self):
         pass

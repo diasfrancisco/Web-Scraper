@@ -107,7 +107,7 @@ class GetWebtoonLinks:
             GenerateIDs.get_friendly_ID(self, webtoon_link)
             GenerateIDs.generate_v4_UUID(self, webtoon_link)
             WebtoonDirs.webtoon_dir(self.dict_of_friendly_ID)
-            GetDetails.navigate_pages()
+            GetDetails.get_episodes(self, webtoon_link)
             list_of_links.append(webtoon_link)
         return list_of_links
 

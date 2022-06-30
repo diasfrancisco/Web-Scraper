@@ -1,13 +1,12 @@
 import time
-import json
 import webtoon.constants as const
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webtoon.single_webtoon import GenerateIDs, GetDetails
-from webtoon.store_data import WebtoonDirs
+from webtoon.single_webtoon import GenerateIDs
+from webtoon.single_webtoon import GetDetails
 
 
 class GetWebtoonLinks:
@@ -19,6 +18,7 @@ class GetWebtoonLinks:
         self.dict_of_webtoon_links = {}
         self.dict_of_friendly_ID = {}
         self.dict_of_v4_UUID = {}
+        self.dict_of_webtoon_info = {}
 
     def get_genres(self):
         self.driver.find_element(By.XPATH, '//*[@class="NPI=a:genre,g:en_en"]').click() # Go to the genres tab
@@ -106,24 +106,6 @@ class GetWebtoonLinks:
             webtoon_link = link_tag.get_attribute('href')
             GenerateIDs.get_friendly_ID(self, webtoon_link)
             GenerateIDs.generate_v4_UUID(self, webtoon_link)
-            WebtoonDirs.webtoon_dir(self.dict_of_friendly_ID)
             GetDetails.get_episodes(self, webtoon_link)
             list_of_links.append(webtoon_link)
         return list_of_links
-
-    '''def export_dict(self):
-        # Export all the necessary dictionaries to view and check data types
-        webtoon_dict = json.dumps(self.dict_of_webtoon_links)
-        f = open('webtoon_dict.json', 'w')
-        f.write(webtoon_dict)
-        f.close
-
-        ID_dict = json.dumps(self.dict_of_friendly_ID)
-        f = open('ID_dict.json', 'w')
-        f.write(ID_dict)
-        f.close
-
-        v4_UUID_dict = json.dumps(self.dict_of_v4_UUID)
-        f = open('v4_UUID_dict.json', 'w')
-        f.write(v4_UUID_dict)
-        f.close'''

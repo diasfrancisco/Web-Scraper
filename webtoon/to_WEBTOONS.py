@@ -7,7 +7,6 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webtoon.get_webtoons import GetWebtoonLinks
-from webtoon.store_data import WebtoonDirs
 
 
 class Webtoon(webdriver.Chrome):
@@ -71,13 +70,15 @@ class Webtoon(webdriver.Chrome):
             # If the cookies frame take longer than 10sec to load print out the following statement
             print("Took too long to load...")
 
-    def check_if_dir_exists(self):
-        create_dir_instance = WebtoonDirs(driver=self)
-        create_dir_instance.create_dir()
+    def create_raw_data_dir(self):
+        # Check if a dir called 'raw_data' exists and if not create one
+        if os.path.isdir(const.DATA_DIR_PATH):
+            pass
+        else:
+            os.mkdir(const.DATA_DIR_PATH)
 
-    def collect_genres(self):
+    def scrape_webtoon(self):
         # Calls the class and methods needed to get genres, generate a friendly ID and a v4 UUID
-        genre_instance = GetWebtoonLinks(driver=self)
-        genre_instance.get_genres()
-        genre_instance.get_webtoon_list()
-        #genre_instance.export_dict()
+        scrape_instance = GetWebtoonLinks(driver=self)
+        scrape_instance.get_genres()
+        scrape_instance.get_webtoon_list()

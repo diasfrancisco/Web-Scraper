@@ -9,7 +9,6 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import webtoon.constants as const
 
@@ -66,11 +65,9 @@ class GetDetails():
                 EC.presence_of_element_located((By.XPATH, '//*[@class="ly_adult"]'))
             )
             notice_container = self.driver.find_element(By.XPATH, '//*[@class="ly_adult"]')
-            btn_area = notice_container.find_element(By.CLASS_NAME, 'btnarea')
-            time.sleep(5)
-            ok_btn = btn_area.find_element(By.CLASS_NAME, 'btn1_cancel')
-            time.sleep(1)
+            ok_btn = notice_container.find_element(By.CLASS_NAME, '_ok')
             ok_btn.click()
+            time.sleep(4)
         except TimeoutException:
             pass
 

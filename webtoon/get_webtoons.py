@@ -1,11 +1,12 @@
 import time
-import webtoon.constants as const
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webtoon.single_webtoon import GenerateIDs
+
+import webtoon.constants as const
 from webtoon.single_webtoon import GetDetails
 
 
@@ -21,6 +22,7 @@ class GetWebtoonLinks:
         self.dict_of_webtoon_info = {}
 
     def get_genres(self):
+        time.sleep(2)
         self.driver.find_element(By.XPATH, '//*[@class="NPI=a:genre,g:en_en"]').click() # Go to the genres tab
 
         time.sleep(2)
@@ -104,8 +106,6 @@ class GetWebtoonLinks:
             # each episode
             link_tag = webtoon.find_element(By.TAG_NAME, 'a')
             webtoon_link = link_tag.get_attribute('href')
-            GenerateIDs.get_friendly_ID(self, webtoon_link)
-            GenerateIDs.generate_v4_UUID(self, webtoon_link)
             GetDetails.get_episodes(self, webtoon_link)
             list_of_links.append(webtoon_link)
         return list_of_links

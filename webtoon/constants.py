@@ -9,4 +9,4 @@ DOB_YEAR = "1998"
 DELAY = 10
 
 # Create a dir to store data
-DATA_DIR_PATH = '/home/diasfrancisco/GitLocal/Web-Scraper/raw_data'
+DATA_DIR_PATH = '/home/cisco/GitLocal/Web-Scraper/raw_data'

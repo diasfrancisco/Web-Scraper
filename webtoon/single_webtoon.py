@@ -21,8 +21,8 @@ class GenerateIDs:
     def get_friendly_ID(self, current_ep_url):
         # Obtain a friendly ID using the numbers in the 'title no='
         # section of the current url
-        split_ID = current_ep_url.split("/")[5:7]
-        friendly_ID = "-".join(split_ID)
+        split_url = current_ep_url.split("/")[5:7]
+        friendly_ID = "-".join(split_url)
         self.dict_of_friendly_ID[current_ep_url] = friendly_ID
 
     def generate_v4_UUID(self, current_ep_url):

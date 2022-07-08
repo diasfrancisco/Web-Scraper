@@ -61,10 +61,10 @@ class GetDetails:
         # Check if previous episode button is available
         while len(self.driver.find_elements(By.CLASS_NAME, '_prevEpisode')) > 0:
             # Generate IDs for the episode and scrape image data
-            current_ep_url = self.driver.current_url()
+            current_ep_url = self.driver.current_url
             GenerateIDs.get_friendly_ID(self, current_ep_url)
             GenerateIDs.generate_v4_UUID(self, current_ep_url)
-            GetDetails.webtoon_dir(self)
+            GetDetails.webtoon_dir(self, current_ep_url)
             GetDetails.scrape_image_data(self, current_ep_url)
             # Find and click the previous button
             prev_ep_btn = self.driver.find_element(By.CLASS_NAME, '_prevEpisode')
@@ -160,20 +160,19 @@ class GetDetails:
                 with open(path, "wb") as f:
                     image.save(f, "JPEG")
 
-    def webtoon_dir(self):
+    def webtoon_dir(self, current_ep_url):
         # Create a new directory for each webtoon and further children
         # directories if they do not exist
-        for key, value in self.dict_of_friendly_ID.items():
-            if os.path.isdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{value}'):
-                pass
-            else:
-                os.mkdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{value}')
-            GetDetails.images_dir(self, value)
-
-    def images_dir(self, value):
-        # Creates an image directory if it doesn't exist
-        if os.path.isdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{value}/images'):
+        folder_name = self.dict_of_friendly_ID[current_ep_url]
+        if os.path.isdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{folder_name}'):
             pass
         else:
-            os.mkdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{value}/images')
-            
+            os.mkdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{folder_name}')
+        GetDetails.images_dir(self, folder_name)
+
+    def images_dir(self, folder_name):
+        # Creates an image directory if it doesn't exist
+        if os.path.isdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{folder_name}/images'):
+            pass
+        else:
+            os.mkdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{folder_name}/images')

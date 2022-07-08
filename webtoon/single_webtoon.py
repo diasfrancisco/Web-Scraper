@@ -18,18 +18,18 @@ class GenerateIDs:
     def __init__(self, driver:WebDriver):
         self.driver = driver
 
-    def get_friendly_ID(self, ep_link):
+    def get_friendly_ID(self, current_ep_url):
         # Obtain a friendly ID using the numbers in the 'title no='
         # section of the current url
-        split_ID = ep_link.split("/")[5:7]
+        split_ID = current_ep_url.split("/")[5:7]
         friendly_ID = "-".join(split_ID)
-        self.dict_of_friendly_ID[ep_link] = friendly_ID
+        self.dict_of_friendly_ID[current_ep_url] = friendly_ID
 
-    def generate_v4_UUID(self, ep_link):
+    def generate_v4_UUID(self, current_ep_url):
         # Generate a unique v4 UUID using the uuid library and save it to
         # a dictionary
         v4_UUID = str(uuid.uuid4())
-        self.dict_of_v4_UUID[ep_link] = v4_UUID
+        self.dict_of_v4_UUID[current_ep_url] = v4_UUID
 
 class GetDetails:
     def __init__(self, driver:WebDriver):
@@ -53,17 +53,24 @@ class GetDetails:
         ep_container = self.driver.find_element(By.XPATH, '//*[@id="_listUl"]')
         latest_ep = ep_container.find_element(By.TAG_NAME, 'li')
         ep_tag = latest_ep.find_element(By.TAG_NAME, 'a')
-        ep_link = ep_tag.get_attribute('href')
-        self.driver.get(ep_link)
+        latest_ep_link = ep_tag.get_attribute('href')
+        self.driver.get(latest_ep_link)
+        # Bypass maturity barrier
+        GetDetails.bypass_maturity_notice(self)
 
         # Check if previous episode button is available
         while len(self.driver.find_elements(By.CLASS_NAME, '_prevEpisode')) > 0:
-            # Generate IDs for the episode
-            GenerateIDs.get_friendly_ID(self, ep_link)
-            GenerateIDs.generate_v4_UUID(self, ep_link)
-            # Bypass maturity barrier
-            GetDetails.bypass_maturity_notice(self)
-            GetDetails.scrape_image_data(self, ep_link)
+            # Generate IDs for the episode and scrape image data
+            current_ep_url = self.driver.current_url()
+            GenerateIDs.get_friendly_ID(self, current_ep_url)
+            GenerateIDs.generate_v4_UUID(self, current_ep_url)
+            GetDetails.webtoon_dir(self)
+            GetDetails.scrape_image_data(self, current_ep_url)
+            # Find and click the previous button
+            prev_ep_btn = self.driver.find_element(By.CLASS_NAME, '_prevEpisode')
+            prev_ep_btn_link = prev_ep_btn.get_attribute('href')
+            self.driver.get(prev_ep_btn_link)
+            time.sleep(2)
         self.driver.close()
 
     def bypass_maturity_notice(self):
@@ -131,10 +138,8 @@ class GetDetails:
 
         return self.dict_of_webtoon_info
 
-    def scrape_image_data(self, ep_link):
+    def scrape_image_data(self, current_ep_url):
         # Get all image links
-        GetDetails.webtoon_dir(self)
-        time.sleep(2)
         image_container = self.driver.find_element(By.ID, '_imageList')
         all_images = image_container.find_elements(By.TAG_NAME, 'img')
         img_counter = 1
@@ -142,13 +147,13 @@ class GetDetails:
             # Get the link to a single image and go to the website using the ep_link
             # as a referer
             source = img.get_attribute('src')
-            img_site = requests.get(source, headers={'referer': ep_link})
+            img_site = requests.get(source, headers={'referer': current_ep_url})
             if img_site.status_code == 200:
                 # If the site loads up successfuly with status code 200, save the image
                 image = Image.open(BytesIO(img_site.content))
                 if image.mode != 'RGB':
                     image = image.convert('RGB')
-                ID_for_path = self.dict_of_friendly_ID[ep_link]
+                ID_for_path = self.dict_of_friendly_ID[current_ep_url]
                 path = f'/home/cisco/GitLocal/Web-Scraper/raw_data/{ID_for_path}/images/{ID_for_path}_{img_counter}'
                 img_counter += 1
                 # Open a file using the path generated and save the image as a JPEG file

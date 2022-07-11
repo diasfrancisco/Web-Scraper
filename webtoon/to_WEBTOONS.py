@@ -1,3 +1,4 @@
+from ast import arguments
 import os
 import time
 
@@ -6,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.options import Options
 
 import webtoon.constants as const
 from webtoon.get_webtoons import GetWebtoonLinks
@@ -17,8 +19,9 @@ class Webtoon(webdriver.Chrome):
         self.executable_path = executable_path
         self.collapse = collapse
         os.environ['PATH'] += self.executable_path
-        super(Webtoon, self).__init__()
-        self.maximize_window()
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless")
+        super(Webtoon, self).__init__(options=options)
 
     def __exit__(self, *args):
         # Exit the webpage

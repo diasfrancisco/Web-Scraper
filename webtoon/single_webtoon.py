@@ -67,11 +67,22 @@ class GetDetails:
             GetDetails.webtoon_dir(self, current_ep_url)
             GetDetails.scrape_image_data(self, current_ep_url)
             # Find and click the previous button
+            try:
+                WebDriverWait(self.driver, const.DELAY).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, '_prevEpisode'))
+                )
+            except TimeoutException:
+                print("Previous episode button did not load")
             prev_ep_btn = self.driver.find_element(By.CLASS_NAME, '_prevEpisode')
             prev_ep_btn_link = prev_ep_btn.get_attribute('href')
             self.driver.get(prev_ep_btn_link)
             time.sleep(2)
+        GenerateIDs.get_friendly_ID(self, current_ep_url)
+        GenerateIDs.generate_v4_UUID(self, current_ep_url)
+        GetDetails.webtoon_dir(self, current_ep_url)
+        GetDetails.scrape_image_data(self, current_ep_url)
         self.driver.close()
+        self.driver.switch_to.window(self.driver.window_handles[0])
 
     def bypass_maturity_notice(self):
         # Wait for the maturity notice to appear
@@ -153,8 +164,9 @@ class GetDetails:
                 image = Image.open(BytesIO(img_site.content))
                 if image.mode != 'RGB':
                     image = image.convert('RGB')
-                ID_for_path = self.dict_of_friendly_ID[current_ep_url]
-                path = f'/home/cisco/GitLocal/Web-Scraper/raw_data/{ID_for_path}/images/{ID_for_path}_{img_counter}'
+                webtoon_ID = current_ep_url.split("/")[5]
+                episode_ID = self.dict_of_friendly_ID[current_ep_url]
+                path = f'/home/cisco/GitLocal/Web-Scraper/raw_data/{webtoon_ID}/{episode_ID}/images/{episode_ID}_{img_counter}'
                 img_counter += 1
                 # Open a file using the path generated and save the image as a JPEG file
                 with open(path, "wb") as f:
@@ -163,16 +175,26 @@ class GetDetails:
     def webtoon_dir(self, current_ep_url):
         # Create a new directory for each webtoon and further children
         # directories if they do not exist
-        folder_name = self.dict_of_friendly_ID[current_ep_url]
-        if os.path.isdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{folder_name}'):
+        webtoon_folder = current_ep_url.split("/")[5]
+        if os.path.isdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{webtoon_folder}'):
             pass
         else:
-            os.mkdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{folder_name}')
-        GetDetails.images_dir(self, folder_name)
+            os.mkdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{webtoon_folder}')
+        GetDetails.episode_dir(self, current_ep_url, webtoon_folder)
 
-    def images_dir(self, folder_name):
-        # Creates an image directory if it doesn't exist
-        if os.path.isdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{folder_name}/images'):
+    def episode_dir(self, current_ep_url, webtoon_folder):
+        # Create a new directory for each webtoon and further children
+        # directories if they do not exist
+        episode_folder = self.dict_of_friendly_ID[current_ep_url]
+        if os.path.isdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{webtoon_folder}/{episode_folder}'):
             pass
         else:
-            os.mkdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{folder_name}/images')
+            os.mkdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{webtoon_folder}/{episode_folder}')
+        GetDetails.images_dir(self, webtoon_folder, episode_folder)
+
+    def images_dir(self, webtoon_folder, episode_folder):
+        # Creates an image directory if it doesn't exist
+        if os.path.isdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{webtoon_folder}/{episode_folder}/images'):
+            pass
+        else:
+            os.mkdir(f'/home/cisco/GitLocal/Web-Scraper/raw_data/{webtoon_folder}/{episode_folder}/images')

@@ -109,7 +109,7 @@ class GetDetails:
             info_container = self.driver.find_element(By.CLASS_NAME, 'info')
             time.sleep(2)
         except TimeoutException:
-            print("Episode container did not load")
+            print("Stats container did not load")
         # Get info on genre, title and author
         genre = info_container.find_element(By.XPATH, '//h2')
         info_dict["Genre"] = [genre.text]

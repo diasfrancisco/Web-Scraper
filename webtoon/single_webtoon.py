@@ -1,9 +1,11 @@
+from concurrent.futures import ThreadPoolExecutor
 import os
 import uuid
 import time
 import requests
 from io import BytesIO
 from PIL import Image
+from requests_futures.sessions import FuturesSession
 
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import TimeoutException
@@ -30,6 +32,8 @@ class GenerateIDs:
         # a dictionary
         v4_UUID = str(uuid.uuid4())
         self.dict_of_v4_UUID[current_ep_url] = v4_UUID
+
+#--------------------------------------------------------------------------------------
 
 class GetDetails:
     def __init__(self, driver:WebDriver):
@@ -149,17 +153,19 @@ class GetDetails:
 
         return self.dict_of_webtoon_info
 
-    def scrape_image_data(self, current_ep_url):
+    def img_urls(self):
         # Get all image links
         image_container = self.driver.find_element(By.ID, '_imageList')
         all_images = image_container.find_elements(By.TAG_NAME, 'img')
-        img_counter = 1
+        src_list = []
         for img in all_images:
-            # Get the link to a single image and go to the website using the ep_link
-            # as a referer
-            source = img.get_attribute('src')
-            img_site = requests.get(source, headers={'referer': current_ep_url})
-            if img_site.status_code == 200:
+            src_list.append(img.get_attribute('src'))
+        GetDetails.scrape_image_data(self, src_list)
+
+    def scrape_image_data(self, src_list):
+        with FuturesSession(executor=ThreadPoolExecutor, max_workers=100) as session:
+            futures = [session.get(src, headers={'referer': src} for src in src_list)]
+            if src.status_code == 200:
                 # If the site loads up successfuly with status code 200, save the image
                 image = Image.open(BytesIO(img_site.content))
                 if image.mode != 'RGB':

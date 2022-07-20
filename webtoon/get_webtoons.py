@@ -81,7 +81,7 @@ class GetWebtoonLinks:
                 EC.presence_of_element_located((By.XPATH, '//*[@class="card_wrap genre"]'))
             )
         except TimeoutException:
-            print("Container did not load")
+            print("Webtoon container did not load")
 
         genre_container = self.driver.find_element(
             By.XPATH, '//*[@class="card_wrap genre"]'

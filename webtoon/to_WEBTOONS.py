@@ -1,4 +1,3 @@
-from ast import arguments
 import os
 import time
 
@@ -11,6 +10,7 @@ from selenium.webdriver.chrome.options import Options
 
 import webtoon.constants as const
 from webtoon.get_webtoons import GetWebtoonLinks
+#from webtoon.single_webtoon import GetDetails
 
 
 class Webtoon(webdriver.Chrome):
@@ -82,8 +82,12 @@ class Webtoon(webdriver.Chrome):
         else:
             os.mkdir(const.DATA_DIR_PATH)
 
-    def scrape_webtoon(self):
-        # Calls the class and methods needed to get genres, generate a friendly ID and a v4 UUID
-        scrape_instance = GetWebtoonLinks(driver=self)
-        scrape_instance.get_genres()
-        scrape_instance.get_webtoon_list()
+    def scrape_genres_and_webtoon_urls(self):
+        # Calls the class and methods needed to get genres and webtoon urls
+        genres_and_webtoon_urls = GetWebtoonLinks(driver=self)
+        return genres_and_webtoon_urls.get_genres(), genres_and_webtoon_urls.get_webtoon_list()
+
+    def scrape_data(self):
+        webtoon_dict = self.scrape_genres_and_webtoon_urls()[1]
+        #for webtoon in webtoon_dict:
+            #data_collection = GetDetails(driver=self)

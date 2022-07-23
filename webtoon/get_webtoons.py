@@ -1,5 +1,3 @@
-import time
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import TimeoutException
@@ -7,7 +5,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 import webtoon.constants as const
-from webtoon.single_webtoon import GetDetails
 
 
 class GetWebtoonLinks:
@@ -17,15 +14,9 @@ class GetWebtoonLinks:
         self.genre_list = []
         self._g_list = []
         self.dict_of_webtoon_links = {}
-        self.dict_of_friendly_ID = {}
-        self.dict_of_v4_UUID = {}
-        self.dict_of_webtoon_info = {}
 
     def get_genres(self):
-        time.sleep(2)
-        self.driver.find_element(By.XPATH, '//*[@class="NPI=a:genre,g:en_en"]').click() # Go to the genres tab
-
-        time.sleep(2)
+        self.driver.find_element(By.XPATH, '//*[@class="NPI=a:genre,g:en_en"]').click()
 
         # Wait for the main genre element to appear
         try:
@@ -52,8 +43,7 @@ class GetWebtoonLinks:
                 pass
             else:
                 self._g_list.append(_main_name)
-            
-            
+
         # Grab the name of all genres in the 'others' section
         other_button = self.driver.find_element(By.CLASS_NAME, 'g_others')
         other_button.find_element(By.TAG_NAME, 'a').click()
@@ -64,7 +54,8 @@ class GetWebtoonLinks:
         for li_2 in other_genre_lis:
             other_genre_name = li_2.find_element(By.TAG_NAME, 'a')
             self.genre_list.append(other_genre_name.text)
-        # Will be used to find certain elements in the future
+        # Collect all the 'data-genre' attributes and save it to a
+        # dictionary to be used as a locator key
         for _ in main_genre_lis:
             _other_name = _.get_attribute('data-genre')
             if _other_name == "OTHERS":
@@ -72,7 +63,7 @@ class GetWebtoonLinks:
             else:
                 self._g_list.append(_other_name)
 
-        return self.genre_list, self._g_list
+        return self.genre_list
 
     def get_webtoon_list(self):
         # Wait for the container element to appear
@@ -87,25 +78,22 @@ class GetWebtoonLinks:
             By.XPATH, '//*[@class="card_wrap genre"]'
         )
         for genre in self._g_list:
-            # Collect all the 'data-genre' attributes and save it to a
-            # dictionary to be used as a locator key
+            # Use the 'data-genre' locator key to find all webtoons in a certain genre
+            # and save these to a dictionary
             webtoon_container = genre_container.find_element(
                 By.XPATH, f'//h2[@data-genre="{genre}"]/following-sibling::ul'
             )
             webtoons = webtoon_container.find_elements(By.TAG_NAME, 'li')
-            all_links = self.get_all_webtoon_links(webtoons)
+            all_links = self.get_all_webtoon_urls(webtoons)
             self.dict_of_webtoon_links[genre] = all_links
         return self.dict_of_webtoon_links
 
-    def get_all_webtoon_links(self, webtoons):
+    def get_all_webtoon_urls(self, webtoons):
         list_of_links = []
         for webtoon in webtoons:
             # For every li tag, get the link from the 'href' attribute and
-            # for every webtoon link generate a friendly ID, a v4 UUID, a
-            # new directory. Also, get all episode links and the data from
-            # each episode
+            # append this to a list
             link_tag = webtoon.find_element(By.TAG_NAME, 'a')
-            webtoon_link = link_tag.get_attribute('href')
-            GetDetails.get_episodes(self, webtoon_link)
-            list_of_links.append(webtoon_link)
+            webtoon_url = link_tag.get_attribute('href')
+            list_of_links.append(webtoon_url)
         return list_of_links

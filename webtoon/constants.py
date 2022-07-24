@@ -9,4 +9,6 @@ DOB_YEAR = "1998"
 DELAY = 10
 
 # Create a dir to store data
-DATA_DIR_PATH = '/home/cisco/GitLocal/Web-Scraper/raw_data'
+RAW_DATA_DIR_PATH = '/home/cisco/GitLocal/Web-Scraper/raw_data'
+GENRES_AND_WEBTOON_URLS_DIR_PATH = '/home/cisco/GitLocal/Web-Scraper/raw_data/genres_and_webtoon_urls'
+WEBTOON_DIR_PATH = '/home/cisco/GitLocal/Web-Scraper/raw_data/webtoon'

@@ -1,3 +1,6 @@
+import os
+import json
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.common.exceptions import TimeoutException
@@ -11,7 +14,6 @@ class GetWebtoonLinks:
     # Initialise the link collection class
     def __init__(self, driver:WebDriver):
         self.driver = driver
-        self.genre_list = []
         self._g_list = []
         self.dict_of_webtoon_links = {}
 
@@ -25,18 +27,34 @@ class GetWebtoonLinks:
             )
         except TimeoutException:
             print("Genre element did not load")
-
+        
         # Grab the name of all genres in the main section
         main_genres = self.driver.find_element(By.XPATH, '//*[@class="snb _genre"]')
         main_genre_lis = main_genres.find_elements(By.TAG_NAME, 'li')
-        # Will be used for display purposes
-        for li_1 in main_genre_lis:
-            main_genre_name = li_1.find_element(By.TAG_NAME, 'a')
-            if main_genre_name.get_attribute('class') == '':
-                pass
-            else:
-                self.genre_list.append(main_genre_name.text)
-        # Will be used to find certain elements in the future
+
+        # Create file if it doesn't already exist and add an empty list to it
+        if os.path.isfile(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/genres.json'):
+            pass
+        else:
+            with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/genres.json', 'w') as f:
+                json.dump([], f)
+
+        with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/genres.json', 'r') as f:
+            genre_list = json.load(f)
+
+        with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/genres.json', 'w') as f:
+            # Will be used for display purposes
+            for li_1 in main_genre_lis:
+                main_genre_name = li_1.find_element(By.TAG_NAME, 'a')
+                if main_genre_name.get_attribute('class') == '':
+                    pass
+                elif main_genre_name.text in genre_list:
+                    continue
+                else:
+                    genre_list.append(main_genre_name.text)
+            json.dump(genre_list, f)
+        # Collect all the 'data-genre' attributes and save it to a
+        # list to be used as a locator key
         for _ in main_genre_lis:
             _main_name = _.get_attribute('data-genre')
             if _main_name == "OTHERS":
@@ -50,20 +68,26 @@ class GetWebtoonLinks:
 
         other_genres = self.driver.find_element(By.XPATH, '//*[@class="ly_lst_genre as_genre"]')
         other_genre_lis = other_genres.find_elements(By.TAG_NAME, 'li')
-        # Will be used for display purposes
-        for li_2 in other_genre_lis:
-            other_genre_name = li_2.find_element(By.TAG_NAME, 'a')
-            self.genre_list.append(other_genre_name.text)
+        
+        with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/genres.json', 'r') as f:
+            genre_list = json.load(f)
+
+        with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/genres.json', 'w') as f:
+            for li_2 in other_genre_lis:
+                other_genre_name = li_2.find_element(By.TAG_NAME, 'a')
+                if other_genre_name.text in genre_list:
+                    continue
+                else:
+                    genre_list.append(other_genre_name.text)
+            json.dump(genre_list, f)
         # Collect all the 'data-genre' attributes and save it to a
-        # dictionary to be used as a locator key
+        # list to be used as a locator key
         for _ in main_genre_lis:
             _other_name = _.get_attribute('data-genre')
             if _other_name == "OTHERS":
                 pass
             else:
                 self._g_list.append(_other_name)
-
-        return self.genre_list
 
     def get_webtoon_list(self):
         # Wait for the container element to appear

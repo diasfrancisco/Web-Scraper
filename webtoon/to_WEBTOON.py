@@ -82,14 +82,14 @@ class Webtoon(webdriver.Chrome):
         genres_and_webtoon_urls.get_genres()
         genres_and_webtoon_urls.get_webtoon_list()
 
-    # def get_webtoon_info(self):
-    #     IDs_and_imgs = GetDetails(driver=self)
-    #     webtoon_dict = self.scrape_genres_and_webtoon_urls()[1]
-    #     drama = webtoon_dict.get('DRAMA')
-    #     url = drama[0]
-    #     IDs_and_imgs.get_basic_info(webtoon_url=url)
-    #     #for webtoon in webtoon_dict:
-    #         #data_collection = GetDetails(driver=self)
+    def get_webtoon_info(self):
+        IDs_and_imgs = GetDetails(driver=self)
+        webtoon_dict = self.scrape_genres_and_webtoon_urls()[1]
+        drama = webtoon_dict.get('DRAMA')
+        url = drama[0]
+        IDs_and_imgs.get_basic_info(webtoon_url=url)
+        # for webtoon in webtoon_dict:
+        #     data_collection = GetDetails(driver=self)
 
     # def get_img_urls(self):
     #     pass

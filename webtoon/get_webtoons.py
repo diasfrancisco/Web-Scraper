@@ -15,7 +15,6 @@ class GetWebtoonLinks:
     def __init__(self, driver:WebDriver):
         self.driver = driver
         self._g_list = []
-        self.dict_of_webtoon_links = {}
 
     def get_genres(self):
         self.driver.find_element(By.XPATH, '//*[@class="NPI=a:genre,g:en_en"]').click()
@@ -82,7 +81,7 @@ class GetWebtoonLinks:
             json.dump(genre_list, f)
         # Collect all the 'data-genre' attributes and save it to a
         # list to be used as a locator key
-        for _ in main_genre_lis:
+        for _ in other_genre_lis:
             _other_name = _.get_attribute('data-genre')
             if _other_name == "OTHERS":
                 pass
@@ -98,26 +97,54 @@ class GetWebtoonLinks:
         except TimeoutException:
             print("Webtoon container did not load")
 
+        # Create file if it doesn't already exist and add an empty list to it
+        if os.path.isfile(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/webtoon_urls.json'):
+            pass
+        else:
+            with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/webtoon_urls.json', 'w') as f:
+                json.dump({}, f)
+
         genre_container = self.driver.find_element(
             By.XPATH, '//*[@class="card_wrap genre"]'
         )
-        for genre in self._g_list:
-            # Use the 'data-genre' locator key to find all webtoons in a certain genre
-            # and save these to a dictionary
-            webtoon_container = genre_container.find_element(
-                By.XPATH, f'//h2[@data-genre="{genre}"]/following-sibling::ul'
-            )
-            webtoons = webtoon_container.find_elements(By.TAG_NAME, 'li')
-            all_links = self.get_all_webtoon_urls(webtoons)
-            self.dict_of_webtoon_links[genre] = all_links
-        return self.dict_of_webtoon_links
 
-    def get_all_webtoon_urls(self, webtoons):
-        list_of_links = []
+        with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/webtoon_urls.json', 'r') as f:
+            dict_of_webtoon_links = json.load(f)
+
+        with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/webtoon_urls.json', 'w') as f:
+            for genre in self._g_list:
+                # If not a genre, add to dictionary
+                try:
+                    current_genre_urls = dict_of_webtoon_links[genre]
+                    pass
+                except KeyError:
+                    dict_of_webtoon_links[genre] = []
+            
+            json.dump(dict_of_webtoon_links, f)
+
+        with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/webtoon_urls.json', 'r') as f:
+            dict_of_webtoon_links = json.load(f)
+
+        with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/webtoon_urls.json', 'w') as f:
+            for genre in self._g_list:
+                current_genre_urls = dict_of_webtoon_links[genre]
+                webtoon_container = genre_container.find_element(
+                    By.XPATH, f'//h2[@data-genre="{genre}"]/following-sibling::ul'
+                )
+                webtoons = webtoon_container.find_elements(By.TAG_NAME, 'li')
+                updated_genre_urls = self.get_all_webtoon_urls(webtoons, current_genre_urls)
+                dict_of_webtoon_links.update(genre=updated_genre_urls)
+            
+            json.dump(dict_of_webtoon_links, f)
+
+    def get_all_webtoon_urls(self, webtoons, current_genre_urls):
         for webtoon in webtoons:
             # For every li tag, get the link from the 'href' attribute and
             # append this to a list
             link_tag = webtoon.find_element(By.TAG_NAME, 'a')
             webtoon_url = link_tag.get_attribute('href')
-            list_of_links.append(webtoon_url)
-        return list_of_links
+            if webtoon_url in current_genre_urls:
+                continue
+            else:
+                current_genre_urls.append(webtoon_url)
+        return current_genre_urls

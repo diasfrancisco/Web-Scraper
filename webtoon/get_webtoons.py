@@ -46,7 +46,7 @@ class GetWebtoonLinks:
             for li_1 in main_genre_lis:
                 main_genre_name = li_1.find_element(By.TAG_NAME, 'a')
                 if main_genre_name.get_attribute('class') == '':
-                    pass
+                    continue
                 elif main_genre_name.text in genre_list:
                     continue
                 else:
@@ -57,7 +57,7 @@ class GetWebtoonLinks:
         for _ in main_genre_lis:
             _main_name = _.get_attribute('data-genre')
             if _main_name == "OTHERS":
-                pass
+                continue
             else:
                 self._g_list.append(_main_name)
 
@@ -83,10 +83,7 @@ class GetWebtoonLinks:
         # list to be used as a locator key
         for _ in other_genre_lis:
             _other_name = _.get_attribute('data-genre')
-            if _other_name == "OTHERS":
-                pass
-            else:
-                self._g_list.append(_other_name)
+            self._g_list.append(_other_name)
 
     def get_webtoon_list(self):
         # Wait for the container element to appear
@@ -126,14 +123,14 @@ class GetWebtoonLinks:
             dict_of_webtoon_links = json.load(f)
 
         with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/webtoon_urls.json', 'w') as f:
-            for genre in self._g_list:
-                current_genre_urls = dict_of_webtoon_links[genre]
+            for gen in self._g_list:
+                current_genre_urls = dict_of_webtoon_links[gen]
                 webtoon_container = genre_container.find_element(
-                    By.XPATH, f'//h2[@data-genre="{genre}"]/following-sibling::ul'
+                    By.XPATH, f'//h2[@data-genre="{gen}"]/following-sibling::ul'
                 )
                 webtoons = webtoon_container.find_elements(By.TAG_NAME, 'li')
                 updated_genre_urls = self.get_all_webtoon_urls(webtoons, current_genre_urls)
-                dict_of_webtoon_links.update(genre=updated_genre_urls)
+                dict_of_webtoon_links[gen] = updated_genre_urls
             
             json.dump(dict_of_webtoon_links, f)
 

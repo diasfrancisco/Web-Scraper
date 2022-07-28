@@ -1,6 +1,9 @@
+from concurrent.futures import ProcessPoolExecutor
 from lib2to3.pgen2 import driver
 import os
 import time
+import json
+import asyncio
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,6 +15,7 @@ import webtoon.constants as const
 from webtoon.get_webtoons import GetWebtoonLinks
 from webtoon.single_webtoon import GetDetails
 from webtoon.create_dirs import CreateDirs
+from webtoon.single_episode import ScrapeImages
 
 
 class Webtoon(webdriver.Chrome):
@@ -83,26 +87,13 @@ class Webtoon(webdriver.Chrome):
         genres_and_webtoon_urls.get_webtoon_list()
 
     def get_webtoon_info(self):
-        IDs_and_imgs = GetDetails(driver=self)
-        
-        # for webtoon in webtoon_dict:
-        #     data_collection = GetDetails(driver=self)
+        with open(const.GENRES_AND_WEBTOON_URLS_DIR_PATH + '/webtoon_urls.json', 'r') as f:
+            dict_of_webtoon_links = json.load(f)
 
-    # def get_img_urls(self):
-    #     pass
+        info = GetDetails(driver=self)
+        for webtoon_list in dict_of_webtoon_links.values():
+            info.get_basic_info(webtoon_list)
 
-    # def scrape_image_data(self, src_list):
-    #     with FuturesSession(executor=ThreadPoolExecutor, max_workers=100) as session:
-    #         futures = [session.get(src, headers={'referer': src} for src in src_list)]
-    #         if src.status_code == 200:
-    #             # If the site loads up successfuly with status code 200, save the image
-    #             image = Image.open(BytesIO(img_site.content))
-    #             if image.mode != 'RGB':
-    #                 image = image.convert('RGB')
-    #             webtoon_ID = current_ep_url.split("/")[5]
-    #             episode_ID = self.dict_of_friendly_ID[current_ep_url]
-    #             path = f'/home/cisco/GitLocal/Web-Scraper/raw_data/{webtoon_ID}/{episode_ID}/images/{episode_ID}_{img_counter}'
-    #             img_counter += 1
-    #             # Open a file using the path generated and save the image as a JPEG file
-    #             with open(path, "wb") as f:
-    #                 image.save(f, "JPEG")
+    def get_IDs_and_imgs(self):
+        scrape_imgs = ScrapeImages(driver=self)
+        pass

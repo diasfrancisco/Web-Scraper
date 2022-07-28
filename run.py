@@ -11,8 +11,8 @@ def main():
         bot.create_main_dirs()
         bot.scrape_genres_and_webtoon_urls()
         print(f'Completed genre and webtoon url collection in {time.time() - start_time} seconds')
-        #bot.get_img_urls()
-        #print(f'Completed data scraping in {time.time() - start_time} seconds')
+        bot.get_webtoon_info()
+        print(f'Gathered all webtoon info in {time.time() - start_time} seconds')
 
 if __name__=="__main__":
     main()

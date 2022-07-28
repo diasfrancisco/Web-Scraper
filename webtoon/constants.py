@@ -11,4 +11,4 @@ DELAY = 10
 # Create a dir to store data
 RAW_DATA_DIR_PATH = '/home/cisco/GitLocal/Web-Scraper/raw_data'
 GENRES_AND_WEBTOON_URLS_DIR_PATH = '/home/cisco/GitLocal/Web-Scraper/raw_data/genres_and_webtoon_urls'
-WEBTOON_DIR_PATH = '/home/cisco/GitLocal/Web-Scraper/raw_data/webtoon'
+ALL_WEBTOONS_DIR_PATH = '/home/cisco/GitLocal/Web-Scraper/raw_data/all_webtoons'

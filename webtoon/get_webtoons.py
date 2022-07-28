@@ -1,5 +1,6 @@
 import os
 import json
+from requests_futures.sessions import FuturesSession
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
